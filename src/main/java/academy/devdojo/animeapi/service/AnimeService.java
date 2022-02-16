@@ -1,6 +1,7 @@
 package academy.devdojo.animeapi.service;
 
 import academy.devdojo.animeapi.domain.Anime;
+import academy.devdojo.animeapi.exception.BadRequestException;
 import academy.devdojo.animeapi.mapper.AnimeMapper;
 import academy.devdojo.animeapi.repository.AnimeRepository;
 import academy.devdojo.animeapi.request.AnimePostRequest;
@@ -8,14 +9,12 @@ import academy.devdojo.animeapi.request.AnimePutRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class AnimeService {
 
     private final AnimeRepository animeRepository;
@@ -24,20 +23,26 @@ public class AnimeService {
         return animeRepository.findAll();
     }
 
-    public Anime findByIdOrThrowBadRequestException(Long id) {
-        return animeRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(BAD_REQUEST, "Anime not found"));
+    public List<Anime> findAnimesByName(String name) {
+        return animeRepository.findAnimesByName(name);
     }
 
-    @Transactional
+    public Anime findByIdOrThrowBadRequestException(Long id) {
+        return animeRepository.findById(id)
+                .orElseThrow(() -> new BadRequestException("Anime not found"));
+    }
+    // tendo um método que lança Exception (checked), só Transactional não faz o Rollback, precisa passar o rollbackFor = Exception.class
+    @Transactional(rollbackFor = Exception.class)
     public Anime save(AnimePostRequest animePostRequest) {
         return animeRepository.save(AnimeMapper.INSTANCE.toAnime(animePostRequest));
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public void delete(Long id) {
         animeRepository.delete(findByIdOrThrowBadRequestException(id));
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public void replace(AnimePutRequest animePutRequest) {
         findByIdOrThrowBadRequestException(animePutRequest.getId());
         var anime = AnimeMapper.INSTANCE.toAnime(animePutRequest);
