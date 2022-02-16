@@ -7,6 +7,8 @@ import academy.devdojo.animeapi.service.AnimeService;
 import academy.devdojo.animeapi.util.DateUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -28,6 +30,14 @@ public class AnimeController {
     public ResponseEntity<List<Anime>> findAll() {
         log.info(dateUtil.formatLocalDateTiemToDatabaseStyle(LocalDateTime.now()));
         return ResponseEntity.ok(animeService.findAll());
+    }
+
+    // e.g.: localhost:8081/api/v1/animes/pageable?size=5&page=1
+    // e.g.: localhost:8081/api/v1/animes/pageable?size=5&page=0&sort=name,desc
+    @GetMapping("pageable")
+    public ResponseEntity<Page<Anime>> findAll(Pageable pageable) {
+        log.info(dateUtil.formatLocalDateTiemToDatabaseStyle(LocalDateTime.now()));
+        return ResponseEntity.ok(animeService.findAll(pageable));
     }
 
     @GetMapping("{id}")
