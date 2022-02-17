@@ -4,6 +4,7 @@ package academy.devdojo.animeapi.domain;
 import lombok.*;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotEmpty;
 
 @Builder
 @Getter
@@ -22,5 +23,6 @@ public class Anime {
     private Long id;
 
     @Column(name = "name", nullable = false)
+    @NotEmpty(message = "field name can not be empty")
     private String name;
 }
